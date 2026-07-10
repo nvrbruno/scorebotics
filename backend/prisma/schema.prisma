@@ -1,0 +1,330 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  not_started
+  in_progress
+  finished
+}
+
+enum RegistrationStatus {
+  pending
+  under_review
+  accepted
+}
+
+enum BadgeType {
+  participant
+  volunteer
+  admin
+  responsible
+}
+
+model Championship {
+  id          String    @id @default(uuid())
+  name        String    @db.VarChar(150)
+  description String?   @db.VarChar(255)
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  status      Status    @default(not_started)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  events         Event[]
+  documents      Document[]
+  administrators ChampionshipAdministrator[]
+
+  @@map("championship")
+}
+
+model Event {
+  id             String    @id @default(uuid())
+  championshipId String    @map("championship_id")
+  name           String    @db.VarChar(150)
+  description    String?   @db.VarChar(255)
+  location       String?   @db.VarChar(150)
+  startDate      DateTime? @map("start_date")
+  endDate        DateTime? @map("end_date")
+  status         Status    @default(not_started)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  championship Championship     @relation(fields: [championshipId], references: [id])
+  categories   Category[]
+  evaluations  TeamEvaluation[]
+  rankings     Ranking[]
+  schedules    Schedule[]
+  documents    Document[]
+  volunteers   VolunteerEvent[]
+
+  @@map("event")
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  eventId     String  @map("event_id")
+  name        String  @db.VarChar(150)
+  description String? @db.VarChar(255)
+
+  event    Event           @relation(fields: [eventId], references: [id])
+  teams    Team[]
+  judges   JudgeCategory[]
+  rankings Ranking[]
+
+  @@map("category")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  categoryId  String   @map("category_id")
+  name        String   @db.VarChar(150)
+  institution String?  @db.VarChar(150)
+  logoUrl     String?  @map("logo_url") @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  category      Category          @relation(fields: [categoryId], references: [id])
+  responsibles  TeamResponsible[]
+  participants  TeamParticipant[]
+  evaluations   TeamEvaluation[]
+  rankings      Ranking[]
+  registrations Registration[]
+  schedules     Schedule[]
+  documents     TeamDocument[]
+
+  @@map("team")
+}
+
+model Responsible {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(150)
+  cpf          String   @unique @db.VarChar(14)
+  email        String   @unique @db.VarChar(150)
+  phone        String?  @db.VarChar(30)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  teams         TeamResponsible[]
+  registrations Registration[]
+
+  @@map("responsible")
+}
+
+model TeamResponsible {
+  teamId        String   @map("team_id")
+  responsibleId String   @map("responsible_id")
+  role          String   @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  team        Team        @relation(fields: [teamId], references: [id])
+  responsible Responsible @relation(fields: [responsibleId], references: [id])
+
+  @@id([teamId, responsibleId])
+  @@map("team_responsible")
+}
+
+model Participant {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(150)
+  birthDate DateTime? @map("birth_date")
+  cpf       String?   @unique @db.VarChar(14)
+  bio       String?   @db.VarChar(400)
+
+  teams TeamParticipant[]
+
+  @@map("participant")
+}
+
+model TeamParticipant {
+  teamId        String  @map("team_id")
+  participantId String  @map("participant_id")
+  role          String? @db.VarChar(50)
+
+  team        Team        @relation(fields: [teamId], references: [id])
+  participant Participant @relation(fields: [participantId], references: [id])
+
+  @@id([teamId, participantId])
+  @@map("team_participant")
+}
+
+model Judge {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(150)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  categories  JudgeCategory[]
+  evaluations TeamEvaluation[]
+
+  @@map("judge")
+}
+
+model JudgeCategory {
+  judgeId    String @map("judge_id")
+  categoryId String @map("category_id")
+
+  judge    Judge    @relation(fields: [judgeId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@id([judgeId, categoryId])
+  @@map("judge_category")
+}
+
+model TeamEvaluation {
+  id          String   @id @default(uuid())
+  judgeId     String   @map("judge_id")
+  teamId      String   @map("team_id")
+  eventId     String   @map("event_id")
+  score       Decimal  @db.Decimal(6, 2)
+  evaluatedAt DateTime @default(now()) @map("evaluated_at")
+
+  judge Judge @relation(fields: [judgeId], references: [id])
+  team  Team  @relation(fields: [teamId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([judgeId, teamId, eventId])
+  @@map("team_evaluation")
+}
+
+model Ranking {
+  id            String   @id @default(uuid())
+  eventId       String   @map("event_id")
+  categoryId    String   @map("category_id")
+  teamId        String   @map("team_id")
+  position      Int
+  totalScore    Decimal  @map("total_score") @db.Decimal(8, 2)
+  lastUpdatedAt DateTime @default(now()) @map("last_updated_at")
+
+  event    Event    @relation(fields: [eventId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+  team     Team     @relation(fields: [teamId], references: [id])
+
+  @@map("ranking")
+}
+
+model Registration {
+  id            String             @id @default(uuid())
+  teamId        String             @map("team_id")
+  responsibleId String             @map("responsible_id")
+  acceptedTerms Boolean            @default(false) @map("accepted_terms")
+  status        RegistrationStatus @default(pending)
+  submittedAt   DateTime           @default(now()) @map("submitted_at")
+
+  team        Team        @relation(fields: [teamId], references: [id])
+  responsible Responsible @relation(fields: [responsibleId], references: [id])
+
+  @@map("registration")
+}
+
+model Schedule {
+  id        String    @id @default(uuid())
+  eventId   String    @map("event_id")
+  teamId    String    @map("team_id")
+  date      DateTime  @db.Date
+  startTime DateTime  @map("start_time") @db.Time
+  endTime   DateTime? @map("end_time") @db.Time
+  location  String?   @db.VarChar(150)
+  status    String    @default("scheduled") @db.VarChar(30)
+
+  event Event @relation(fields: [eventId], references: [id])
+  team  Team  @relation(fields: [teamId], references: [id])
+
+  @@map("schedule")
+}
+
+model TeamDocument {
+  id         String   @id @default(uuid())
+  teamId     String   @map("team_id")
+  title      String   @db.VarChar(150)
+  type       String?  @db.VarChar(50)
+  fileUrl    String   @map("file_url") @db.VarChar(255)
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@map("team_documents")
+}
+
+// Polymorphic badge: entityId points to participant, volunteer,
+// admin, or responsible depending on "type". Referential integrity
+// for this relation is enforced at the application level, not the database.
+model Badge {
+  id       String    @id @default(uuid())
+  type     BadgeType
+  entityId String    @map("entity_id")
+  qrCode   String?   @map("qr_code") @db.VarChar(255)
+  issuedAt DateTime  @default(now()) @map("issued_at")
+
+  @@map("badge")
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  championshipId String?  @map("championship_id")
+  eventId        String?  @map("event_id")
+  title          String   @db.VarChar(150)
+  fileUrl        String   @map("file_url") @db.VarChar(255)
+  uploadedAt     DateTime @default(now()) @map("uploaded_at")
+
+  championship Championship? @relation(fields: [championshipId], references: [id])
+  event        Event?        @relation(fields: [eventId], references: [id])
+
+  @@map("document")
+}
+
+model Volunteer {
+  id    String  @id @default(uuid())
+  name  String  @db.VarChar(150)
+  email String  @unique @db.VarChar(150)
+  role  String? @db.VarChar(50)
+
+  events VolunteerEvent[]
+
+  @@map("volunteer")
+}
+
+model VolunteerEvent {
+  volunteerId String @map("volunteer_id")
+  eventId     String @map("event_id")
+
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+
+  @@id([volunteerId, eventId])
+  @@map("volunteer_event")
+}
+
+model Administrator {
+  id           String @id @default(uuid())
+  name         String @db.VarChar(150)
+  email        String @unique @db.VarChar(150)
+  passwordHash String @map("password_hash") @db.VarChar(255)
+
+  championships ChampionshipAdministrator[]
+
+  @@map("administrator")
+}
+
+model ChampionshipAdministrator {
+  championshipId  String @map("championship_id")
+  administratorId String @map("administrator_id")
+
+  championship  Championship  @relation(fields: [championshipId], references: [id])
+  administrator Administrator @relation(fields: [administratorId], references: [id])
+
+  @@id([championshipId, administratorId])
+  @@map("championship_administrator")
+}
