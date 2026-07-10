@@ -64,7 +64,7 @@ npm run dev
 
 ### Testando a API
 
-As rotas da API podem ser testadas via Postman. A collection do projeto está disponível em `/postman` (ou adicione o link de exportação da sua collection aqui).
+As rotas da API podem ser testadas via Postman. A collection do projeto está disponível em `/postman`.
 
 ## 🚧 Status
 
