@@ -1,0 +1,13 @@
+{
+  // Separate tsconfig for the Prisma seed script.
+  // It is kept isolated from the main tsconfig because the seed is an
+  // administrative/one-off script (not application code), so it should
+  // not be bundled into the production build output (dist/) nor share
+  // the app's rootDir constraints.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist-seed"
+  },
+  "include": ["prisma/seed.ts"]
+}
