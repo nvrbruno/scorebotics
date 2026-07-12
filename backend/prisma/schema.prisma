@@ -32,6 +32,12 @@ enum BadgeType {
   responsible
 }
 
+enum TeamStatus {
+  created
+  under_review
+  approved
+}
+
 model Championship {
   id          String    @id @default(uuid())
   name        String    @db.VarChar(150)
@@ -87,12 +93,13 @@ model Category {
 }
 
 model Team {
-  id          String   @id @default(uuid())
-  categoryId  String   @map("category_id")
-  name        String   @db.VarChar(150)
-  institution String?  @db.VarChar(150)
-  logoUrl     String?  @map("logo_url") @db.VarChar(255)
-  createdAt   DateTime @default(now()) @map("created_at")
+  id          String     @id @default(uuid())
+  categoryId  String     @map("category_id")
+  name        String     @db.VarChar(150)
+  institution String?    @db.VarChar(150)
+  logoUrl     String?    @map("logo_url") @db.VarChar(255)
+  status      TeamStatus @default(created)
+  createdAt   DateTime   @default(now()) @map("created_at")
 
   category      Category          @relation(fields: [categoryId], references: [id])
   responsibles  TeamResponsible[]
