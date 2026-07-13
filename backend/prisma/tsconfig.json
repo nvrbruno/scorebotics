@@ -1,0 +1,11 @@
+{
+  // Local tsconfig so the editor (VS Code) picks up Node types for files
+  // inside this folder — it always resolves the nearest tsconfig.json to
+  // the open file. This does not affect `ts-node --project tsconfig.seed.json`,
+  // which is still what actually runs the seed script.
+  "extends": "../tsconfig.seed.json",
+  "compilerOptions": {
+    "rootDir": ".."
+  },
+  "include": ["seed.ts"]
+}
