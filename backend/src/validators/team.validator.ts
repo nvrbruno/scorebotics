@@ -8,9 +8,9 @@ export const createTeamSchema = z.object({
   logoUrl: z.string().max(255).optional(),
 });
 
-// Validates payload for updating a Team (all fields optional)
+// Validates payload for updating a status Team
 export const updateTeamStatusSchema = z.object({
-  status: z.string().max(255)
+  status: z.enum(["created", "under_review", "approved"])
 });
 
 // Validates payload for updating a Team (all fields optional)
