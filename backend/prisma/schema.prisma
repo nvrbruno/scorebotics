@@ -119,6 +119,7 @@ model Responsible {
   cpf          String   @unique @db.VarChar(14)
   email        String   @unique @db.VarChar(150)
   phone        String?  @db.VarChar(30)
+  birthDate    DateTime @map("birth_date") @db.Date
   passwordHash String   @map("password_hash") @db.VarChar(255)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
