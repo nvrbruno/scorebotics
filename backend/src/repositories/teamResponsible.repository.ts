@@ -18,6 +18,10 @@ export class TeamResponsibleRepository implements ITeamResponsibleRepository {
     return prisma.teamResponsible.findUnique({ where: { id } });
   }
 
+  findByResponsibleId(responsibleId: string) {
+  return prisma.teamResponsible.findFirst({ where: { responsibleId } });
+}
+
   update(id: string, data: UpdateTeamResponsibleDTO) {
     return prisma.teamResponsible.update({ where: { id }, data });
   }

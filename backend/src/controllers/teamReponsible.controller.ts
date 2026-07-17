@@ -26,16 +26,26 @@ export class TeamResponsibleController {
     }
   }
 
-  
-  async findById(req: Request, res: Response) {
-    try {
-      const teamResponsible = await service.findById(req.params.id as string);
-      res.json(teamResponsible);
-    } catch (error) {
-      res.status(404).json({ message: (error as Error).message });
-    }
+  async findByResponsibleId(req: AuthenticatedRequest, res: Response) {
+  try {
+    const responsibleId = req.user!.sub;
+    const team = await service.findByResponsibleId(responsibleId);
+    res.json(team);
+  } catch (error) {
+    res.status(404).json({ message: (error as Error).message });
   }
+}
+
   
+async adminFindById(req: AuthenticatedRequest, res: Response) {
+  try {
+    const responsibleId = req.user!.sub;
+    const teamReponsible = await service.findById(responsibleId);
+    res.json(teamReponsible);
+  } catch (error) {
+    res.status(404).json({ message: (error as Error).message });
+  }
+}
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
       const responsibleId = req.user!.sub;

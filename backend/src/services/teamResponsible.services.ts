@@ -1,25 +1,28 @@
-import { CreateTeamResponsibleDTO, UpdateTeamResponsibleDTO } from '../dto/teamResponsible.dto';
-import { ResponsibleRepository } from '../repositories/responsible.repository';
-import { TeamRepository } from '../repositories/team.repository';
-import { TeamResponsibleRepository } from '../repositories/teamResponsible.repository';
+import {
+  CreateTeamResponsibleDTO,
+  UpdateTeamResponsibleDTO,
+} from "../dto/teamResponsible.dto";
+import { ResponsibleRepository } from "../repositories/responsible.repository";
+import { TeamRepository } from "../repositories/team.repository";
+import { TeamResponsibleRepository } from "../repositories/teamResponsible.repository";
 
 const teamRepository = new TeamRepository();
 const responsibleRepository = new ResponsibleRepository();
 const repository = new TeamResponsibleRepository();
 
 export class TeamResponsibleService {
- async create(teamId: string, responsibleId: string, role?: string) {
+  async create(teamId: string, responsibleId: string, role?: string) {
     const [team, responsible] = await Promise.all([
       teamRepository.findById(teamId),
       responsibleRepository.findById(responsibleId),
     ]);
 
     if (!team) {
-      throw new Error('Team not found');
+      throw new Error("Team not found");
     }
 
     if (!responsible) {
-      throw new Error('Responsible not found');
+      throw new Error("Responsible not found");
     }
 
     const teamResponsible = await repository.create({
@@ -38,7 +41,15 @@ export class TeamResponsibleService {
   async findById(id: string) {
     const teamResponsible = await repository.findById(id);
     if (!teamResponsible) {
-      throw new Error('teamResponsible not found');
+      throw new Error("teamResponsible not found");
+    }
+    return teamResponsible;
+  }
+
+  async findByResponsibleId(id: string) {
+    const teamResponsible = await repository.findByResponsibleId(id);
+    if (!teamResponsible) {
+      throw new Error("teamResponsible not found");
     }
     return teamResponsible;
   }
