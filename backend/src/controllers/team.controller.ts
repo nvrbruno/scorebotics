@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { createTeamSchema, updateTeamSchema, updateTeamStatusSchema } from "../validators/team.validator";
 import { TeamService } from "../services/team.services";
-
+import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 const service = new TeamService();
 
 export class TeamController {
@@ -33,7 +33,7 @@ export class TeamController {
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: AuthenticatedRequest, res: Response) {
     try {
       const data = updateTeamSchema.parse(req.body);
       const team = await service.update(req.params.id as string, data);
@@ -43,7 +43,7 @@ export class TeamController {
     }
   }
 
- async updateStatus(req: Request, res: Response) {
+ async updateStatus(req: AuthenticatedRequest, res: Response) {
   try {
     const data = updateTeamStatusSchema.parse(req.body);
     const team = await service.updateStatus(req.params.id as string, data);
@@ -53,7 +53,7 @@ export class TeamController {
   }
 }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: AuthenticatedRequest, res: Response) {
     try {
       await service.delete(req.params.id as string);
       res.status(204).send();
@@ -61,4 +61,25 @@ export class TeamController {
       res.status(400).json({ message: (error as Error).message });
     }
   }
+
+  async updateByResponsibleId(req: AuthenticatedRequest, res: Response) {
+  try {
+    const responsibleId = req.user!.sub;
+    const data = updateTeamSchema.parse(req.body);
+    const team = await service.updateByResponsibleId(responsibleId, data);
+    res.json(team);
+  } catch (error) {
+    res.status(400).json({ message: (error as Error).message });
+  }
+}
+
+async deleteByResponsibleId(req: AuthenticatedRequest, res: Response) {
+  try {
+    const responsibleId = req.user!.sub;
+    await service.deleteByResponsibleId(responsibleId);
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ message: (error as Error).message });
+  }
+}
 }

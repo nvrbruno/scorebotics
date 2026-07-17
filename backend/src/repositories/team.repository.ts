@@ -30,4 +30,8 @@ export class TeamRepository implements ITeamRepository {
   async delete(id: string) {
     await prisma.team.delete({ where: { id } });
   }
+
+  findByResponsibleId(responsibleId: string) {
+  return prisma.teamResponsible.findFirst({ where: { responsibleId } });
+}
 }
