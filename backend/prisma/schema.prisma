@@ -131,23 +131,25 @@ model Responsible {
 }
 
 model TeamResponsible {
+  id            String   @default(uuid())
   teamId        String   @map("team_id")
   responsibleId String   @map("responsible_id")
-  role          String   @db.VarChar(50)
+  role          String?  @db.VarChar(50)
   createdAt     DateTime @default(now()) @map("created_at")
 
   team        Team        @relation(fields: [teamId], references: [id])
   responsible Responsible @relation(fields: [responsibleId], references: [id])
 
   @@id([teamId, responsibleId])
+  @@unique([id])
   @@map("team_responsible")
 }
 
 model Participant {
   id        String    @id @default(uuid())
   name      String    @db.VarChar(150)
-  birthDate DateTime? @map("birth_date")
-  cpf       String?   @unique @db.VarChar(14)
+  birthDate DateTime @map("birth_date")
+  cpf       String   @unique @db.VarChar(14)
   bio       String?   @db.VarChar(400)
 
   teams TeamParticipant[]
@@ -156,14 +158,17 @@ model Participant {
 }
 
 model TeamParticipant {
-  teamId        String  @map("team_id")
-  participantId String  @map("participant_id")
-  role          String? @db.VarChar(50)
+  id            String   @default(uuid())
+  teamId        String   @map("team_id")
+  participantId String   @map("participant_id")
+  role          String?  @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
 
   team        Team        @relation(fields: [teamId], references: [id])
   participant Participant @relation(fields: [participantId], references: [id])
 
   @@id([teamId, participantId])
+  @@unique([id])
   @@map("team_participant")
 }
 
