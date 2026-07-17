@@ -39,7 +39,7 @@ export class TeamResponsibleController {
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
       const responsibleId = req.user!.sub;
-      await service.delete(responsibleId);
+      await service.deleteByResponsibleId(responsibleId);
       res.status(204).send();
     } catch (error) {
       res.status(400).json({ message: (error as Error).message });

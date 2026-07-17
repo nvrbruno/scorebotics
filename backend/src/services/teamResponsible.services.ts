@@ -50,4 +50,7 @@ export class TeamResponsibleService {
   delete(id: string) {
     return repository.delete(id);
   }
+  deleteByResponsibleId(id: string) {
+    return repository.deleteByResponsibleId(id);
+  }
 }

@@ -6,6 +6,7 @@ import adminRoutes from "./admin.routes";
 import teamRoutes from "./team.routes";
 import responsibleRoutes from "./responsible.routes";
 import adminResponsibleRoutes from "./adminResponsible.routes";
+import teamResponsibleRoutes from "./teamResponsible.routes";
 
 
 const router = Router();
@@ -17,5 +18,6 @@ router.use('/', adminRoutes);
 router.use('/', teamRoutes);
 router.use('/', responsibleRoutes);
 router.use('/', adminResponsibleRoutes);
+router.use('/', teamResponsibleRoutes);
 
 export default router;

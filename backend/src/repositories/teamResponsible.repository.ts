@@ -1,6 +1,9 @@
-import { prisma } from '../configs/prisma';
-import { ITeamResponsibleRepository } from '../interfaces/teamResponsible.interface';
-import { CreateTeamResponsibleDTO, UpdateTeamResponsibleDTO } from '../dto/teamResponsible.dto';
+import { prisma } from "../configs/prisma";
+import { ITeamResponsibleRepository } from "../interfaces/teamResponsible.interface";
+import {
+  CreateTeamResponsibleDTO,
+  UpdateTeamResponsibleDTO,
+} from "../dto/teamResponsible.dto";
 
 export class TeamResponsibleRepository implements ITeamResponsibleRepository {
   create(data: CreateTeamResponsibleDTO) {
@@ -21,5 +24,9 @@ export class TeamResponsibleRepository implements ITeamResponsibleRepository {
 
   async delete(id: string) {
     await prisma.teamResponsible.delete({ where: { id } });
+  }
+
+  deleteByResponsibleId(responsibleId: string) {
+    return prisma.teamResponsible.deleteMany({ where: { responsibleId } });
   }
 }
